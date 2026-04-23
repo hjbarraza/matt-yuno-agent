@@ -54,7 +54,7 @@ The persona is yours to name and shape. The assistant maintains a durable wiki o
   Terminal ────────────────┼────────────────────────────────▶  Claude Code
   Chrome Remote ───────────┘  direct to Mac                     │
                                                                  ├──▶  Whisper       speech → text
-                                                                 ├──▶  Voxtral 4B    text → voice
+                                                                 ├──▶  Kokoro 82M    text → voice  (or Voxtral 4B)
                                                                  ├──▶  Knowledge Wiki   ~/knowledge/
                                                                  ├──▶  Local Repos      ~/code/
                                                                  ├──▶  GitHub Repos     gh CLI
@@ -76,7 +76,7 @@ The persona is yours to name and shape. The assistant maintains a durable wiki o
 | Agent | Claude Code CLI | Terminal, your Mac |
 | Channel | Telegram MCP plugin (Bun / TypeScript) | Spawned by Claude Code |
 | Speech → text | openai-whisper | Local CPU / GPU |
-| Text → speech | Voxtral-4B-TTS via `mlx-audio` | Local Apple Silicon GPU |
+| Text → speech | Kokoro-82M (default, fast) or Voxtral-4B-TTS (slower, more personality) via `mlx-audio` | Local Apple Silicon GPU |
 | Memory | Karpathy-style wiki — plain markdown + git | `~/knowledge/` |
 | Observability | Patched MCP server + LaunchAgent watchdog | `launchctl`, every 5 min |
 | Guardrails | Hooks: reply-enforcer + coding-guidelines | Claude Code harness |
@@ -97,7 +97,7 @@ matt-stack/
 ├── STACK-GUIDE.md            Long-form manual — why everything works the way it does
 │
 ├── assets/
-│   ├── welcome.wav               Audio introduction — 24-bit, 24 kHz, BF16 Voxtral
+│   ├── welcome.wav               Audio introduction — 24-bit, 24 kHz, BF16 Voxtral (the voice you'll hear on first run)
 │   ├── aeris-apple-watch.jpeg    Photo
 │   ├── aeris-blackberry.jpeg     Photo
 │   ├── doc-launch.svg            Terminal diagram — launching Claude
@@ -113,7 +113,8 @@ matt-stack/
     │   └── telegram-reply-enforcer.py       Ensures every Telegram message gets a reply
     │
     ├── scripts/
-    │   ├── voxtral-tts.py                   TTS helper — synthesizes WAV, converts to OGG opus
+    │   ├── kokoro-tts.py                    TTS helper (Kokoro 82M) — fast default, ~3s wall
+    │   ├── voxtral-tts.py                   TTS helper (Voxtral 4B) — slower but more personality
     │   └── mcp-health-check.py              Pings the Telegram MCP server; restarts if dead
     │
     ├── launchagents/
@@ -151,7 +152,7 @@ Before anything else, confirm you have:
 - **macOS 13 Ventura or later**
 - **Personal Claude account** — team and enterprise plans silently disable `--channels`, which breaks the Telegram integration. The bot will show "typing…" but never respond. Check at [claude.ai](https://claude.ai) → profile → plan. Switch to personal before proceeding.
 - **A Telegram account** and a phone number
-- **~3 GB free disk** for the Voxtral TTS model (downloaded on first voice use)
+- **Free disk for TTS models**: ~200 MB if you pick Kokoro (recommended), ~3 GB if you pick Voxtral, ~3.2 GB if you install both. Downloaded on first voice use.
 
 <br>
 
