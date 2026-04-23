@@ -13,6 +13,10 @@
 <sub>CLAUDE CODE &nbsp;·&nbsp; TELEGRAM &nbsp;·&nbsp; LOCAL VOICE &nbsp;·&nbsp; DURABLE MEMORY</sub>
 
 <br>
+
+<a href="./welcome.wav">▶&nbsp;&nbsp;welcome.wav — listen to the intro</a>
+
+<br>
 <br>
 
 <img src="aeris-apple-watch.jpeg" width="46%" alt="λris on Apple Watch" />&nbsp;&nbsp;&nbsp;<img src="aeris-blackberry.jpeg" width="46%" alt="λris on BlackBerry" />
@@ -91,7 +95,7 @@ matt-stack/
 │
 ├── SETUP-PROMPT.md           Guided install — paste into Claude, follow along (60–90 min)
 ├── STACK-GUIDE.md            Long-form manual — why everything works the way it does
-├── welcome.ogg               Audio introduction to this stack
+├── welcome.wav               Audio introduction — 24-bit, 24 kHz, BF16 Voxtral
 │
 ├── templates/
 │   └── knowledge-CLAUDE.md   Schema for your personal Karpathy-style wiki
