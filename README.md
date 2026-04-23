@@ -14,12 +14,12 @@
 
 <br>
 
-<a href="./welcome.wav">▶&nbsp;&nbsp;welcome.wav — listen to the intro</a>
+<a href="./assets/welcome.wav">▶&nbsp;&nbsp;welcome.wav — listen to the intro</a>
 
 <br>
 <br>
 
-<img src="aeris-apple-watch.jpeg" width="46%" alt="λris on Apple Watch" />&nbsp;&nbsp;&nbsp;<img src="aeris-blackberry.jpeg" width="46%" alt="λris on BlackBerry" />
+<img src="assets/aeris-apple-watch.jpeg" width="46%" alt="λris on Apple Watch" />&nbsp;&nbsp;&nbsp;<img src="assets/aeris-blackberry.jpeg" width="46%" alt="λris on BlackBerry" />
 
 <br>
 <br>
@@ -95,7 +95,13 @@ matt-stack/
 │
 ├── SETUP-PROMPT.md           Guided install — paste into Claude, follow along (60–90 min)
 ├── STACK-GUIDE.md            Long-form manual — why everything works the way it does
-├── welcome.wav               Audio introduction — 24-bit, 24 kHz, BF16 Voxtral
+│
+├── assets/
+│   ├── welcome.wav               Audio introduction — 24-bit, 24 kHz, BF16 Voxtral
+│   ├── aeris-apple-watch.jpeg    Photo
+│   ├── aeris-blackberry.jpeg     Photo
+│   ├── doc-launch.svg            Terminal diagram — launching Claude
+│   └── doc-paste.svg             Terminal diagram — pasting the setup prompt
 │
 ├── templates/
 │   └── knowledge-CLAUDE.md   Schema for your personal Karpathy-style wiki
@@ -172,7 +178,7 @@ claude
 
 ### Step 3 — Clone and run the guided install
 
-<img src="doc-launch.svg" alt="Terminal showing claude launch and REPL prompt" width="100%"/>
+<img src="assets/doc-launch.svg" alt="Terminal showing claude launch and REPL prompt" width="100%"/>
 
 ```bash
 git clone https://github.com/hjbarraza/matt-yuno-agent.git ~/matt-stack
@@ -181,7 +187,7 @@ cd ~/matt-stack
 
 Open `SETUP-PROMPT.md`. Copy the prompt inside it (everything between the `>>>` markers). Then:
 
-<img src="doc-paste.svg" alt="Claude REPL showing pasted setup prompt" width="100%"/>
+<img src="assets/doc-paste.svg" alt="Claude REPL showing pasted setup prompt" width="100%"/>
 
 ```bash
 claude
