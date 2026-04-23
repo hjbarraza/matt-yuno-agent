@@ -1,0 +1,122 @@
+--- a/server.ts
++++ b/server.ts
+@@ -19,7 +19,7 @@
+ import { Bot, GrammyError, InlineKeyboard, InputFile, type Context } from 'grammy'
+ import type { ReactionTypeEmoji } from 'grammy/types'
+ import { randomBytes } from 'crypto'
+-import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, statSync, renameSync, realpathSync, chmodSync } from 'fs'
++import { readFileSync, writeFileSync, appendFileSync, mkdirSync, readdirSync, rmSync, statSync, renameSync, realpathSync, chmodSync, existsSync } from 'fs'
+ import { homedir } from 'os'
+ import { join, extname, sep } from 'path'
+ 
+@@ -27,7 +27,28 @@
+ const ACCESS_FILE = join(STATE_DIR, 'access.json')
+ const APPROVED_DIR = join(STATE_DIR, 'approved')
+ const ENV_FILE = join(STATE_DIR, '.env')
++const LOG_FILE = join(STATE_DIR, 'server.log')
++const HEARTBEAT_FILE = join(STATE_DIR, 'heartbeat.json')
+ 
++// Observability: tee stderr to server.log (rotated at 1MB) and add timestamped
++// step logger. Root-cause analysis is impossible when stderr gets swallowed by
++// the parent Claude CLI.
++try {
++  mkdirSync(STATE_DIR, { recursive: true, mode: 0o700 })
++  if (existsSync(LOG_FILE) && statSync(LOG_FILE).size > 1_048_576) {
++    renameSync(LOG_FILE, LOG_FILE + '.1')
++  }
++} catch {}
++const _origStderrWrite = process.stderr.write.bind(process.stderr)
++process.stderr.write = ((chunk: any, ...args: any[]): boolean => {
++  try { appendFileSync(LOG_FILE, typeof chunk === 'string' ? chunk : String(chunk)) } catch {}
++  return _origStderrWrite(chunk, ...args)
++}) as typeof process.stderr.write
++function log(step: string): void {
++  process.stderr.write(`[${new Date().toISOString()}] pid=${process.pid} ${step}\n`)
++}
++log('boot: process started')
++
+ // Load ~/.claude/channels/telegram/.env into process.env. Real env wins.
+ // Plugin-spawned servers don't get an env block — this is where the token lives.
+ try {
+@@ -58,6 +79,7 @@
+ // survive as an orphan and hold the slot forever, so every new session sees
+ // 409 Conflict. Kill any stale holder before we start polling.
+ mkdirSync(STATE_DIR, { recursive: true, mode: 0o700 })
++log(`boot: env loaded, token=${TOKEN ? 'present' : 'MISSING'}, ppid=${process.ppid}`)
+ try {
+   const stale = parseInt(readFileSync(PID_FILE, 'utf8'), 10)
+   if (stale > 1 && stale !== process.pid) {
+@@ -67,6 +89,21 @@
+   }
+ } catch {}
+ writeFileSync(PID_FILE, String(process.pid))
++log('boot: wrote bot.pid')
++
++// Heartbeat: updates mtime every 10s so health-check can distinguish
++// "process alive but stdio pipe broken" from "process dead". Written as JSON
++// so consumers can also read pid/uptime.
++setInterval(() => {
++  try {
++    writeFileSync(HEARTBEAT_FILE, JSON.stringify({
++      pid: process.pid,
++      updatedMs: Date.now(),
++      uptimeSec: Math.round(process.uptime()),
++    }))
++  } catch {}
++}, 10_000).unref()
++try { writeFileSync(HEARTBEAT_FILE, JSON.stringify({ pid: process.pid, updatedMs: Date.now(), uptimeSec: 0 })) } catch {}
+ 
+ // Last-resort safety net — without these the process dies silently on any
+ // unhandled promise rejection. With them it logs and keeps serving tools.
+@@ -628,14 +665,16 @@
+ })
+ 
+ await mcp.connect(new StdioServerTransport())
++log('boot: MCP StdioServerTransport connected — plugin is fully serving tools')
+ 
+ // When Claude Code closes the MCP connection, stdin gets EOF. Without this
+ // the bot keeps polling forever as a zombie, holding the token and blocking
+ // the next session with 409 Conflict.
+ let shuttingDown = false
+-function shutdown(): void {
++function shutdown(reason?: string): void {
+   if (shuttingDown) return
+   shuttingDown = true
++  log(`shutdown: reason=${reason ?? 'unspecified'}`)
+   process.stderr.write('telegram channel: shutting down\n')
+   try {
+     if (parseInt(readFileSync(PID_FILE, 'utf8'), 10) === process.pid) rmSync(PID_FILE)
+@@ -645,22 +684,23 @@
+   setTimeout(() => process.exit(0), 2000)
+   void Promise.resolve(bot.stop()).finally(() => process.exit(0))
+ }
+-process.stdin.on('end', shutdown)
+-process.stdin.on('close', shutdown)
+-process.on('SIGTERM', shutdown)
+-process.on('SIGINT', shutdown)
+-process.on('SIGHUP', shutdown)
++process.stdin.on('end', () => shutdown('stdin-end'))
++process.stdin.on('close', () => shutdown('stdin-close'))
++process.on('SIGTERM', () => shutdown('SIGTERM'))
++process.on('SIGINT', () => shutdown('SIGINT'))
++process.on('SIGHUP', () => shutdown('SIGHUP'))
+ 
+ // Orphan watchdog: stdin events above don't reliably fire when the parent
+ // chain (`bun run` wrapper → shell → us) is severed by a crash. Poll for
+ // reparenting (POSIX) or a dead stdin pipe and self-terminate.
+ const bootPpid = process.ppid
+ setInterval(() => {
+-  const orphaned =
+-    (process.platform !== 'win32' && process.ppid !== bootPpid) ||
+-    process.stdin.destroyed ||
+-    process.stdin.readableEnded
+-  if (orphaned) shutdown()
++  if (process.platform !== 'win32' && process.ppid !== bootPpid) {
++    shutdown(`orphan:reparented(ppid ${bootPpid}→${process.ppid})`)
++    return
++  }
++  if (process.stdin.destroyed) { shutdown('orphan:stdin-destroyed'); return }
++  if (process.stdin.readableEnded) { shutdown('orphan:stdin-readable-ended'); return }
+ }, 5000).unref()
+ 
+ // Commands are DM-only. Responding in groups would: (1) leak pairing codes via

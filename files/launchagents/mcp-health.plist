@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LaunchAgent for MCP Telegram health check.
+
+  Install:
+    1. Replace YOUR_USERNAME below with your actual macOS username (or adjust
+       the absolute paths).
+    2. Place this file at ~/Library/LaunchAgents/<your-label>.mcp-health.plist
+       (the label in the file must match the filename prefix).
+    3. Load it:
+         launchctl load ~/Library/LaunchAgents/<your-label>.mcp-health.plist
+    4. Verify:
+         launchctl list | grep mcp-health
+  Runs every 300s. Checks bot.pid + heartbeat.json, alerts via Bot API on
+  state transitions.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.yourdomain.mcp-health</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/YOUR_USERNAME/.claude/scripts/mcp-health-check.py</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_USERNAME/.claude/channels/telegram/mcp-health.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_USERNAME/.claude/channels/telegram/mcp-health.err</string>
+</dict>
+</plist>
