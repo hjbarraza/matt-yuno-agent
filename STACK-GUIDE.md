@@ -162,14 +162,68 @@ whisper --model small some.ogg    # first run downloads the 'small' model
 
 `tiny` for speed; `small` for accuracy (sweet spot); `medium` for maximum accuracy if you speak quickly.
 
-### Voxtral (text → speech)
+### TTS (text → speech) — pick one
+
+Two local options, both Apple-Silicon-accelerated, both Apache-2.0. Pick based on what matters more: **speed** or **personality**.
+
+| Engine | Wall time (~10s of audio) | Model size | Best for |
+|--------|--------------------------|-----------|----------|
+| **Kokoro 82M** (recommended default) | ~3s | 82M params, ~175 MB weights | Daily driver. Replies feel snappy. 54 voices across 9 languages. Auto-detects the language of the text and picks an appropriate voice. |
+| **Voxtral 4B** | ~30s | 4B params, ~2.5 GB 4-bit weights | A distinctive, more-designed voice. ~10x slower than Kokoro on the same Mac. Pick this if a specific "character" matters more than response latency. |
+
+You can install both and flip between them per message — skills and hooks call the scripts by filename (`kokoro-tts.py` or `voxtral-tts.py`) and both share the same CLI contract.
+
+---
+
+#### Option A — Kokoro (recommended)
+
+```bash
+pip install mlx-audio           # system Python is fine; no venv required
+```
+
+Install the helper:
+
+```bash
+mkdir -p ~/.claude/scripts
+cp ~/matt-stack/files/scripts/kokoro-tts.py ~/.claude/scripts/
+chmod +x ~/.claude/scripts/kokoro-tts.py
+```
+
+First run auto-downloads the Kokoro weights (~175 MB) and the spaCy English model (~50 MB).
+
+**Auto-language switching.** If you call the script without `--voice`, it sniffs the text:
+
+| Text looks like | Voice picked |
+|---|---|
+| English (or unknown) | `bf_emma` (British female) |
+| Spanish (ñ / ¿ / ¡ / stopword probe) | `ef_dora` |
+| French (é, è, œ, etc.) | `ff_siwis` |
+| Italian | `if_sara` |
+| Portuguese BR | `pf_dora` |
+
+Override per-message with `--voice <preset>`. Full voice list after first run under `~/.cache/huggingface/hub/models--prince-canuma--Kokoro-82M/snapshots/*/voices/` — 54 presets covering English US/UK, Spanish, French, Italian, Portuguese BR, Japanese, Mandarin, Hindi.
+
+**Verify Part 3 (Option A):**
+
+```bash
+~/.claude/scripts/kokoro-tts.py "Hi, this is your new assistant" --output /tmp/test.ogg
+afplay /tmp/test.ogg
+~/.claude/scripts/kokoro-tts.py "Hola, ¿cómo estás?" --output /tmp/hola.ogg   # auto-switches to ef_dora
+afplay /tmp/hola.ogg
+```
+
+---
+
+#### Option B — Voxtral (slower, more personality)
 
 Voxtral-4B-TTS is Mistral's multilingual TTS, optimized for Apple Silicon via `mlx-audio`.
+
+**Python 3.11 venv required** — the `voxtral-mlx` code inside `mlx-audio[tts]` is incompatible with Python 3.13+.
 
 **Do not** try to install a package called `voxtral-mlx` — it does not exist on PyPI, despite older guides suggesting otherwise. The real package is `mlx-audio`; Voxtral TTS lives inside it.
 
 ```bash
-python3 -m venv ~/voice-venv
+python3.11 -m venv ~/voice-venv
 source ~/voice-venv/bin/activate
 pip install 'mlx-audio[tts]' huggingface_hub tiktoken
 ```
@@ -189,7 +243,9 @@ cp ~/matt-stack/files/scripts/voxtral-tts.py ~/.claude/scripts/
 chmod +x ~/.claude/scripts/voxtral-tts.py
 ```
 
-#### Voice presets — the language rule
+Open the file and update the shebang at the top to point at `~/voice-venv/bin/python3`, or always invoke the script with that Python explicitly.
+
+##### Voice presets — the language rule
 
 20 presets across 9 languages. Two categories:
 
@@ -200,12 +256,18 @@ chmod +x ~/.claude/scripts/voxtral-tts.py
 
 Feed English to `fr_female` and it sounds like a French person struggling to read English. Pick per your dominant language; override per-message with `--voice` when context calls for it.
 
-**Verify Part 3:**
+**Verify Part 3 (Option B):**
 
 ```bash
 ~/.claude/scripts/voxtral-tts.py "<short phrase in chosen preset's language>" --output /tmp/test.ogg --voice <preset>
 afplay /tmp/test.ogg
 ```
+
+---
+
+#### Running both side-by-side (optional)
+
+Keep both in `~/.claude/scripts/`. The voice-reply skill (see `files/skills/voice-reply/SKILL.md`) calls whichever script you point it at. Easiest setup: Kokoro as daily driver, Voxtral explicitly called for marquee messages where personality is the point.
 
 ## Part 4 — Telegram channel
 

@@ -109,27 +109,48 @@ a) Verify Whisper:
 whisper --help | head
 ```
 
-b) Install Voxtral TTS in a dedicated venv:
+b) Ask me which TTS engine I want and present the tradeoff:
+
+> You've got two options, both local, both Apple-Silicon accelerated, both Apache 2.0.
+>
+> **Kokoro 82M** — fast. ~3 seconds of wall time per 10 seconds of audio. 54 voices across 9 languages. Auto-detects the language in the text and picks a matching voice. Recommended default — replies feel snappy.
+>
+> **Voxtral 4B** — slow. ~30 seconds of wall time per 10 seconds of audio. Larger model (4B params vs 82M), more characterful prosody and a more "designed" feel. Worth it if you want a distinctive voice, but every reply will take noticeably longer.
+>
+> Which one do you want as your default? You can install both and swap later.
+
+Wait for my pick. Default to Kokoro if I say "whatever is best."
+
+c) Install the chosen one.
+
+**If Kokoro:**
 ```
-python3 -m venv ~/voice-venv
+pip install mlx-audio
+mkdir -p ~/.claude/scripts
+cp ~/matt-stack/files/scripts/kokoro-tts.py ~/.claude/scripts/
+chmod +x ~/.claude/scripts/kokoro-tts.py
+```
+First run of `kokoro-tts.py` auto-downloads the model (~175 MB) + spaCy English (~50 MB).
+
+**If Voxtral (Python 3.11 venv required — voxtral-mlx is incompatible with Python 3.13+):**
+```
+python3.11 -m venv ~/voice-venv
 source ~/voice-venv/bin/activate
 pip install 'mlx-audio[tts]' huggingface_hub tiktoken
-```
-**Do not** install a package called `voxtral-mlx` — it does not exist on PyPI. Voxtral TTS lives inside `mlx-audio`; the `[tts]` extra pulls in `tiktoken` for the Tekken tokenizer.
-
-Download the weights (warn me: ~2.5 GB quantized, ~1–2 min):
-```
 python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='mlx-community/Voxtral-4B-TTS-2603-mlx-4bit')"
-```
-
-c) Install the TTS helper:
-```
 mkdir -p ~/.claude/scripts
 cp ~/matt-stack/files/scripts/voxtral-tts.py ~/.claude/scripts/
 chmod +x ~/.claude/scripts/voxtral-tts.py
 ```
+Update the shebang at the top of the copied `voxtral-tts.py` to `#!~/voice-venv/bin/python3` (or always invoke the script with that Python explicitly).
 
-d) **Voice preset language rule.** The model ships 20 voice presets. Pick my default based on what language I'll mostly use:
+**Do not** install a package called `voxtral-mlx` — it does not exist on PyPI. Voxtral TTS lives inside `mlx-audio`.
+
+d) **Voice preset rule.**
+
+**If Kokoro:** in the common case the script auto-detects the language of the text and picks an appropriate default voice (`bf_emma` for English, `ef_dora` for Spanish, `ff_siwis` for French, etc.). Override per-message with `--voice <preset>`. 54 presets available; full list under `~/.cache/huggingface/hub/models--prince-canuma--Kokoro-82M/snapshots/*/voices/` after first run.
+
+**If Voxtral:** 20 voice presets split into two categories:
 
 | Preset group | Use for | Examples |
 |---|---|---|
@@ -138,9 +159,13 @@ d) **Voice preset language rule.** The model ships 20 voice presets. Pick my def
 
 Feeding English to `fr_female` sounds wrong. Ask me what language I'll mostly use, pick a preset, tell me which.
 
-**Verify Part 3:** generate a short phrase in the correct language for the chosen voice and play it:
+**Verify Part 3:** generate a short phrase and play it:
 ```
-~/.claude/scripts/voxtral-tts.py "<short phrase in the preset's language>" --output /tmp/test.ogg --voice <preset>
+# Kokoro:
+~/.claude/scripts/kokoro-tts.py "Hi, this is your new assistant" --output /tmp/test.ogg
+afplay /tmp/test.ogg
+# Voxtral:
+~/.claude/scripts/voxtral-tts.py "<phrase in preset's language>" --output /tmp/test.ogg --voice <preset>
 afplay /tmp/test.ogg
 ```
 Ask me if the voice sounds right before continuing.

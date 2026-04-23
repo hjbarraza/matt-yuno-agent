@@ -25,7 +25,8 @@ files/
 │   ├── coding-guidelines-enforcer.py  blocks code edits until guidelines loaded
 │   └── telegram-reply-enforcer.py     blocks session stop without voice reply
 ├── scripts/                           ← drop each file into ~/.claude/scripts/
-│   ├── voxtral-tts.py                 text→speech helper (configure paths)
+│   ├── kokoro-tts.py                  text→speech helper (Kokoro 82M, fast default, ~3s wall time)
+│   ├── voxtral-tts.py                 text→speech helper (Voxtral 4B, slower ~30s wall time but more personality)
 │   └── mcp-health-check.py            detects MCP disconnect (patched-server-aware)
 ├── launchagents/
 │   └── mcp-health.plist               runs the health check every 300s
@@ -76,14 +77,35 @@ cp -r files/skills/* ~/.claude/skills/
 
 Each `SKILL.md` has a frontmatter block with `description` — that's what the agent reads to decide when to invoke. Customize the descriptions to fit your own vocabulary if you want.
 
-### Step 3 — Voxtral script (copied by the main setup, but here's the standalone install)
+### Step 3 — TTS script (pick Kokoro, Voxtral, or both)
 
+Two engines ship in `files/scripts/`:
+
+| Engine | Wall time | Best for |
+|---|---|---|
+| **Kokoro 82M** (recommended default) | ~3s for 10s of audio | Speed, auto-language-detect, 54 voices across 9 languages |
+| **Voxtral 4B** | ~30s for 10s of audio | A distinctive, more-designed voice. ~10x slower than Kokoro. |
+
+**Install Kokoro (fast, recommended):**
 ```bash
+pip install mlx-audio
+cp files/scripts/kokoro-tts.py ~/.claude/scripts/
+chmod +x ~/.claude/scripts/kokoro-tts.py
+```
+First run auto-downloads the Kokoro model (~175 MB) + spaCy (~50 MB). Default voice is `bf_emma` (British female). Script auto-detects language in the text and switches voice to `ef_dora` for Spanish, `ff_siwis` for French, `if_sara` for Italian, `pf_dora` for Portuguese; override per-call with `--voice <preset>`.
+
+**Install Voxtral (slower, more personality):**
+```bash
+python3.11 -m venv ~/voice-venv            # must be 3.11; voxtral-mlx breaks on 3.13+
+source ~/voice-venv/bin/activate
+pip install 'mlx-audio[tts]' huggingface_hub tiktoken
+python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='mlx-community/Voxtral-4B-TTS-2603-mlx-4bit')"
 cp files/scripts/voxtral-tts.py ~/.claude/scripts/
 chmod +x ~/.claude/scripts/voxtral-tts.py
 ```
+Update the shebang in the copied script to `#!~/voice-venv/bin/python3`, or always invoke the script with that Python explicitly. Default voice is `neutral_female` (English-safe). Language-prefixed presets (`fr_female`, `it_male`, `es_female`, ...) need matching-language text — feeding English to `fr_female` sounds wrong.
 
-The script loads the model by HuggingFace repo id (default `mlx-community/Voxtral-4B-TTS-2603-mlx-4bit`), so there's no filesystem path to edit. Override with `--model <repo-id>` per call or set `VOXTRAL_MODEL` in the environment. Default voice is `neutral_female` (English-safe). Change `DEFAULT_VOICE` at the top if you prefer another preset — pick a language-agnostic one (`neutral_*`, `casual_*`, `cheerful_*`) or a language-prefixed one (`fr_*`, `it_*`, `es_*`, …) knowing you'll need to feed it matching-language text.
+**Running both side-by-side:** install both. Call `kokoro-tts.py` from the voice-reply skill as the daily driver; call `voxtral-tts.py` explicitly for marquee messages where personality > speed. Both scripts share the same CLI contract (`text --output file.ogg [--voice preset]`) and return JSON with `{success, file_path, duration, provider, voice}`, so wiring them interchangeably is trivial.
 
 ### Step 4 — Telegram reply enforcer hook
 
