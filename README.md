@@ -168,12 +168,16 @@ claude
 
 ### Step 3 — Clone and run the guided install
 
+<img src="doc-launch.svg" alt="Terminal showing claude launch and REPL prompt" width="100%"/>
+
 ```bash
 git clone https://github.com/hjbarraza/matt-yuno-agent.git ~/matt-stack
 cd ~/matt-stack
 ```
 
 Open `SETUP-PROMPT.md`. Copy the prompt inside it (everything between the `>>>` markers). Then:
+
+<img src="doc-paste.svg" alt="Claude REPL showing pasted setup prompt" width="100%"/>
 
 ```bash
 claude
