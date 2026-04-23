@@ -1,17 +1,8 @@
 <div align="center">
 
 <br>
-<br>
-
-<img src="aeris-apple-watch.jpeg" width="46%" alt="λris on Apple Watch" />&nbsp;&nbsp;&nbsp;<img src="aeris-blackberry.jpeg" width="46%" alt="λris on BlackBerry" />
-
-<br>
-<br>
-<br>
 
 # matt-stack
-
-<br>
 
 **A personal AI chief of staff that lives on your Mac,**  
 **listens on Telegram, speaks back by voice,**  
@@ -20,6 +11,11 @@
 <br>
 
 <sub>CLAUDE CODE &nbsp;·&nbsp; TELEGRAM &nbsp;·&nbsp; LOCAL VOICE &nbsp;·&nbsp; DURABLE MEMORY</sub>
+
+<br>
+<br>
+
+<img src="aeris-apple-watch.jpeg" width="46%" alt="λris on Apple Watch" />&nbsp;&nbsp;&nbsp;<img src="aeris-blackberry.jpeg" width="46%" alt="λris on BlackBerry" />
 
 <br>
 <br>
@@ -133,26 +129,107 @@ matt-stack/
 
 ## Install
 
-**Prerequisites.**&ensp;A Mac on Apple Silicon. A personal Claude account — team and enterprise plans silently disable the Telegram channel. Homebrew.
+Total time: **60–90 minutes** for a first install. The guided path (Step 3) does most of the work interactively — you paste one prompt and follow along.
+
+<br>
+
+### Step 1 — Check requirements
+
+Before anything else, confirm you have:
+
+- **Mac on Apple Silicon** (M1 or later) — required for local voice models
+- **macOS 13 Ventura or later**
+- **Personal Claude account** — team and enterprise plans silently disable `--channels`, which breaks the Telegram integration. The bot will show "typing…" but never respond. Check at [claude.ai](https://claude.ai) → profile → plan. Switch to personal before proceeding.
+- **A Telegram account** and a phone number
+- **~3 GB free disk** for the Voxtral TTS model (downloaded on first voice use)
+
+<br>
+
+### Step 2 — Install dependencies
 
 ```bash
-# 1. Clone
-git clone https://github.com/hjbarraza/matt-stack.git ~/matt-stack
+# Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 2. Install dependencies
+# Core packages
 brew install anthropic/claude/claude-code openai-whisper ffmpeg jq oven-sh/bun/bun
+```
 
-# 3. Authenticate Claude Code
+> **Why `bun`?** The Telegram plugin's MCP server runs on Bun, not Node. The official plugin README doesn't list it as a dependency, but without it the server silently fails to start. Install it now.
+
+Then authenticate Claude Code — it opens your browser for OAuth on first launch:
+
+```bash
+claude
+# Follow the browser prompt, then close Claude with /exit
+```
+
+<br>
+
+### Step 3 — Clone and run the guided install
+
+```bash
+git clone https://github.com/hjbarraza/matt-yuno-agent.git ~/matt-stack
+cd ~/matt-stack
+```
+
+Open `SETUP-PROMPT.md`. Copy the prompt inside it (everything between the `>>>` markers). Then:
+
+```bash
 claude
 ```
 
-**Quick path — guided install in one conversation:**
+Paste the prompt at the `>` prompt. Claude will:
 
-Open `SETUP-PROMPT.md`, run `claude` in Terminal, paste the prompt. Claude will ask for your details and drive the rest — step by step, with verification at each milestone.
+1. Ask for your name, assistant name, and Telegram bot token
+2. Install and configure all hooks, skills, and scripts
+3. Set up the Telegram MCP plugin and apply the stability patch
+4. Configure the LaunchAgent watchdog
+5. Run a verification checklist at the end — 19 checks, all must pass
 
-**Deep path — understand before you install:**
+Follow along and approve each shell command as it runs. Don't skip steps.
 
-Read `STACK-GUIDE.md`. Every architectural decision is documented. Every known failure mode is covered.
+<br>
+
+### Step 4 — Create your Telegram bot
+
+You'll need a bot token before the guided install reaches Part 4. Do this in parallel:
+
+1. Open Telegram and search for **@BotFather**
+2. Send `/newbot`
+3. Choose a display name (any name — Unicode, emoji OK)
+4. Choose a handle — must be ASCII only, must end in `bot` (e.g. `YourNameBot`)
+5. Copy the token BotFather gives you — looks like `1234567890:AAF...`
+6. Send yourself a message on the new bot so it has your chat ID
+7. DM **@userinfobot** to get your Telegram user ID (a number like `8648152515`)
+
+Keep both the bot token and your user ID handy. The guided install will ask for them.
+
+<br>
+
+### Step 5 — Verify
+
+At the end of the guided install, Claude runs a 19-point verification checklist automatically. If anything fails, it will tell you what's wrong and how to fix it.
+
+You can also re-run verification at any time:
+
+```bash
+ct   # launches Claude with Telegram + auto-resume
+```
+
+Then ask: *"Run the verification checklist."*
+
+<br>
+
+### Common issues
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Bot shows "typing…" but never replies | Team/enterprise account — `--channels` is disabled | Switch to personal Claude account |
+| Telegram plugin silently fails to start | Bun not installed | `brew install oven-sh/bun/bun` |
+| Voice reply has no audio / wrong language | Voice preset language mismatch | Use `neutral_female` for English; `fr_female` requires French text |
+| Plugin dies after a few hours | Upstream MCP server bug (no heartbeat) | Apply `files/patches/server.ts.patch` — the guided install does this automatically |
+| Mac sleeps and bot goes offline | No keep-awake strategy | Use the `ct` alias — it wraps Claude in `caffeinate -is` |
 
 <br>
 
@@ -160,13 +237,11 @@ Read `STACK-GUIDE.md`. Every architectural decision is documented. Every known f
 
 <br>
 
-## Requirements
+## Going deeper
 
-- Mac on Apple Silicon — M1 or later
-- macOS 13 Ventura or later
-- Personal Claude account — not team or enterprise
-- ~3 GB free disk for the Voxtral model (4-bit quantized, downloaded on first use)
-- A Telegram account and a phone number
+**`STACK-GUIDE.md`** — the long-form manual. Every architectural decision, every known failure mode, and the reasoning behind each default. Read this when something breaks or before you customize.
+
+**`files/README.md`** — standalone install reference for individual components. Useful if you want to install just the hooks, or just the skills, without running the full guided install.
 
 <br>
 
