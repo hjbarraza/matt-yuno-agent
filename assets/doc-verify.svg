@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 340"
+     font-family="'SF Mono', Menlo, Monaco, 'Courier New', monospace">
+  <defs>
+    <filter id="shadow" x="-8%" y="-8%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <!-- Window -->
+  <rect x="30" y="20" width="640" height="284" rx="12" fill="#1e1e2e" filter="url(#shadow)"/>
+
+  <!-- Title bar -->
+  <rect x="30" y="20" width="640" height="36" rx="12" fill="#302d41"/>
+  <rect x="30" y="44" width="640" height="12" fill="#302d41"/>
+
+  <!-- Traffic lights -->
+  <circle cx="58" cy="38" r="6" fill="#ff5f57"/>
+  <circle cx="78" cy="38" r="6" fill="#febc2e"/>
+  <circle cx="98" cy="38" r="6" fill="#28c840"/>
+
+  <!-- Window title -->
+  <text x="350" y="44" text-anchor="middle" font-size="12" fill="#6e6a86">claude — Terminal</text>
+
+  <!-- ── Step 1: shell relaunch ── -->
+  <text y="92" font-size="13">
+    <tspan x="54" fill="#6e6a86">h@mac</tspan>
+    <tspan fill="#6e6a86"> ~ </tspan>
+    <tspan fill="#a6e3a1" font-weight="700">%</tspan>
+    <tspan fill="#cdd6f4">  ct</tspan>
+  </text>
+  <text x="658" y="92" text-anchor="end" font-size="11"
+        fill="#4a4465" font-family="-apple-system, system-ui, sans-serif">
+    ← relaunch Claude with Telegram + auto-resume
+  </text>
+
+  <!-- Claude Code startup banner -->
+  <rect x="54" y="108" width="510" height="52" rx="7"
+        fill="#2a2a3e" stroke="#45475a" stroke-width="1"/>
+  <text y="128" font-size="13">
+    <tspan x="72" fill="#f4dbd6">✻</tspan>
+    <tspan fill="#cdd6f4" font-weight="600"> Claude Code</tspan>
+    <tspan fill="#6e6a86">  ·  resumed</tspan>
+  </text>
+  <text x="72" y="148" font-size="11.5" fill="#6e6a86">
+    session continues with prior context  ·  plugin:telegram loaded
+  </text>
+
+  <!-- separator: dashed line -->
+  <line x1="54" y1="182" x2="646" y2="182" stroke="#45475a" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="350" y="178" text-anchor="middle" font-size="10"
+        fill="#f9e2af" font-family="-apple-system, system-ui, sans-serif"
+        font-weight="600">
+    ── inside Claude Code (at the ❯ prompt, not your shell) ──
+  </text>
+
+  <!-- ── Step 2: typed into the Claude REPL ── -->
+  <text y="210" font-size="13">
+    <tspan x="54" fill="#89b4fa" font-weight="700">❯</tspan>
+    <tspan fill="#cdd6f4">  Run the verification checklist.</tspan>
+  </text>
+  <rect x="322" y="196" width="9" height="17" rx="1" fill="#89b4fa" opacity="0.9"/>
+  <text x="658" y="210" text-anchor="end" font-size="11"
+        fill="#89b4fa" opacity="0.7" font-family="-apple-system, system-ui, sans-serif">
+    ← typed here (press ↵)
+  </text>
+
+  <!-- Claude response line hint -->
+  <text y="240" font-size="13">
+    <tspan x="54" fill="#f4dbd6">✻</tspan>
+    <tspan fill="#cdd6f4">  Running 19-point verification…</tspan>
+  </text>
+  <text y="262" font-size="13">
+    <tspan x="76" fill="#a6e3a1">✓</tspan>
+    <tspan fill="#6e6a86">  claude --version</tspan>
+  </text>
+  <text y="282" font-size="13">
+    <tspan x="76" fill="#a6e3a1">✓</tspan>
+    <tspan fill="#6e6a86">  ~/.claude/hooks/ · 2 files, executable</tspan>
+  </text>
+
+  <!-- bottom rule + caption -->
+  <line x1="30" y1="304" x2="670" y2="304" stroke="#302d41" stroke-width="1"/>
+  <text x="350" y="325" text-anchor="middle" font-size="11"
+        fill="#6e6a86" font-family="-apple-system, system-ui, sans-serif">
+    Step 5 — Relaunch with  ct  in shell · ask Claude to verify at  ❯
+  </text>
+</svg>

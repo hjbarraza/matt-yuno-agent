@@ -142,6 +142,17 @@ matt-stack/
 
 Total time: **60–90 minutes** for a first install. The guided path (Step 3) does most of the work interactively — you paste one prompt and follow along.
 
+### Reading this guide
+
+Everything runs on the same Mac, but in two different places. Commands in this guide are styled to make the split obvious:
+
+| Where | Looks like | What it is |
+|---|---|---|
+| **Terminal / shell** | ```` ```bash ```` fenced block | Run in your shell (Terminal.app, iTerm, etc.) |
+| **Inside Claude Code** | 💬 blockquote | Type at Claude's `❯` prompt during a session |
+
+When in doubt: if the block starts with `💬`, it goes *inside* Claude. Otherwise, shell. SVG screenshots are included at the key transitions.
+
 <br>
 
 ### Step 1 — Check requirements
@@ -226,26 +237,19 @@ Keep both the bot token and your user ID handy. The guided install will ask for 
 
 At the end of the guided install, Claude runs a 19-point verification checklist automatically. If anything fails, it will tell you what's wrong and how to fix it.
 
-You can also re-run verification at any time. First, relaunch Claude Code with Telegram + auto-resume:
+You can also re-run verification at any time:
+
+<img src="assets/doc-verify.svg" alt="Terminal showing ct relaunch, then Claude REPL with 'Run the verification checklist.' typed at the ❯ prompt" width="100%"/>
+
+Relaunch Claude Code in your shell:
 
 ```bash
 ct
 ```
 
-Then, **inside the Claude Code session** (at the `>` prompt, not your terminal), type:
+Then, **inside the Claude Code session** (at the `❯` prompt, not your terminal), type:
 
 > 💬 Run the verification checklist.
-
-### A note on the two kinds of commands in this guide
-
-Everything runs on the same Mac, but in two different places:
-
-| Where | Looks like | What it is |
-|---|---|---|
-| **Terminal / shell** | ```` ```bash ```` fenced block | Run in your shell |
-| **Inside Claude Code** | 💬 blockquote | Type at Claude's `>` prompt during a session |
-
-When in doubt: if the block starts with `💬`, it goes *inside* Claude. Otherwise, shell.
 
 <br>
 
