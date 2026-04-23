@@ -226,13 +226,26 @@ Keep both the bot token and your user ID handy. The guided install will ask for 
 
 At the end of the guided install, Claude runs a 19-point verification checklist automatically. If anything fails, it will tell you what's wrong and how to fix it.
 
-You can also re-run verification at any time:
+You can also re-run verification at any time. First, relaunch Claude Code with Telegram + auto-resume:
 
 ```bash
-ct   # launches Claude with Telegram + auto-resume
+ct
 ```
 
-Then ask: *"Run the verification checklist."*
+Then, **inside the Claude Code session** (at the `>` prompt, not your terminal), type:
+
+> 💬 Run the verification checklist.
+
+### A note on the two kinds of commands in this guide
+
+Everything runs on the same Mac, but in two different places:
+
+| Where | Looks like | What it is |
+|---|---|---|
+| **Terminal / shell** | ```` ```bash ```` fenced block | Run in your shell |
+| **Inside Claude Code** | 💬 blockquote | Type at Claude's `>` prompt during a session |
+
+When in doubt: if the block starts with `💬`, it goes *inside* Claude. Otherwise, shell.
 
 <br>
 
