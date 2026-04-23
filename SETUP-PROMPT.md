@@ -26,10 +26,10 @@ Some conventions:
 
 ```bash
 cd ~
-git clone https://github.com/hjbarraza/matt-stack.git
+git clone https://github.com/hjbarraza/matt-yuno-agent.git ~/matt-stack
 ```
 
-(If you received the folder another way — zip, USB, AirDrop — place it at `~/matt-stack/` and skip the clone.)
+The repo is named `matt-yuno-agent` on GitHub; the target argument (`~/matt-stack`) renames it locally to match every path used in this guide. If you received the folder another way — zip, USB, AirDrop — place it at `~/matt-stack/` and skip the clone.
 
 **2. Personal Claude account, NOT team/enterprise.** Team and enterprise plans disable `--channels` / remote-control server-side. The Telegram bot will *receive* messages and show a "typing…" indicator, but the MCP server's notifications never reach your CLI session. It looks like the plugin is broken; it isn't — the account plan is blocking it. Sign out and in with a personal account before Part 4, or skip Parts 4–5 entirely. Check at claude.ai → profile → plan.
 
@@ -57,9 +57,10 @@ Deployment targets:
 
 1. Open Terminal.
 2. Complete the Prerequisites above.
-3. Run `claude` and wait for the `>` prompt.
-4. Paste the prompt below **in one shot** (include the triple-backtick fence or not — both work).
-5. Follow along. Claude will ask for your assistant's name, then drive the install through seven parts.
+3. **`cd ~`** — launch Claude Code from your home folder. The install writes to `~/.claude/`, `~/knowledge/`, and `~/Library/LaunchAgents/`; starting from `~` keeps every relative reference working and avoids Claude scoping its session to a nested project directory.
+4. Run `claude` and wait for the `>` prompt.
+5. Paste the prompt below **in one shot** (include the triple-backtick fence or not — both work).
+6. Follow along. Claude will ask for your assistant's name, then drive the install through seven parts.
 
 ---
 

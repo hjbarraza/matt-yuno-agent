@@ -183,14 +183,14 @@ claude
 
 ```bash
 git clone https://github.com/hjbarraza/matt-yuno-agent.git ~/matt-stack
-cd ~/matt-stack
 ```
 
-Open `SETUP-PROMPT.md`. Copy the prompt inside it (everything between the `>>>` markers). Then:
+Open `~/matt-stack/SETUP-PROMPT.md` and copy the prompt inside it (everything between the `>>>` markers). Then return to your home folder and launch Claude Code — the install writes to `~/.claude/`, `~/knowledge/`, and `~/Library/LaunchAgents/`, so starting from `~` keeps every path reference working:
 
 <img src="assets/doc-paste.svg" alt="Claude REPL showing pasted setup prompt" width="100%"/>
 
 ```bash
+cd ~
 claude
 ```
 

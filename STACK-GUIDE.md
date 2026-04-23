@@ -63,8 +63,10 @@ Before you start:
 - **The matt-stack folder** at `~/matt-stack/` — clone from GitHub:
 
 ```bash
-cd ~ && git clone https://github.com/hjbarraza/matt-stack.git
+cd ~ && git clone https://github.com/hjbarraza/matt-yuno-agent.git ~/matt-stack
 ```
+
+The repo is named `matt-yuno-agent` on GitHub; the target argument (`~/matt-stack`) renames it locally to match every path used in this guide.
 
 Install everything Homebrew at once:
 
