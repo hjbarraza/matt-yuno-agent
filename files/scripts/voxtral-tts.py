@@ -121,7 +121,13 @@ def main():
         print(json.dumps({"success": False, "error": "No text provided"}))
         sys.exit(1)
 
-    output_path = args.output or tempfile.mktemp(suffix=".ogg" if not args.wav_only else ".wav")
+    if args.output:
+        output_path = args.output
+    else:
+        with tempfile.NamedTemporaryFile(
+            suffix=".ogg" if not args.wav_only else ".wav", delete=False
+        ) as tf:
+            output_path = tf.name
     is_ogg = output_path.endswith(".ogg") and not args.wav_only
 
     wav_path = output_path if not is_ogg else output_path.replace(".ogg", ".wav")
