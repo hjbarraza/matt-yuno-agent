@@ -301,20 +301,25 @@ jq '.hooks | keys' ~/.claude/settings.json   # should show Stop, PreToolUse amon
 a) Append to `~/.zshrc` (check if they already exist first, don't duplicate):
 ```
 alias cc='claude --dangerously-skip-permissions'
-alias ct='caffeinate -is claude --dangerously-skip-permissions --channels plugin:telegram@claude-plugins-official --continue'
+alias ct='caffeinate -is tmux new -A -s aeris claude --dangerously-skip-permissions --channels plugin:telegram@claude-plugins-official --continue'
 ```
 Then `source ~/.zshrc`.
 
 - `cc` — daily driver, standard sleep behavior.
-- `ct` — launch-with-Telegram-and-resume, wrapped in `caffeinate -is` so the Mac stays idle-awake for as long as the session is alive. When you `/exit`, caffeinate releases and the Mac sleeps normally.
+- `ct` — launch-with-Telegram-and-resume, wrapped in:
+  - `caffeinate -is` so the Mac stays idle-awake for as long as the session is alive. When you `/exit`, caffeinate releases and the Mac sleeps normally.
+  - `tmux new -A -s aeris` (attaches to existing `aeris` session if there is one, creates it otherwise). The tmux wrap is what lets the MCP health watchdog auto-reconnect Telegram via `tmux send-keys '/mcp reconnect plugin:telegram:telegram' Enter` when it detects a disconnect — no manual `/mcp` typing needed.
+  - Override session name with `AERIS_TMUX_SESSION=foo` env var if you want.
 - Warn me: `--dangerously-skip-permissions` means the agent runs shell commands without asking. Only use on a trusted machine.
+- Prereq: `brew install tmux` if not already installed.
 
 b) Remind me to set up Chrome Remote Desktop for phone-based debugging: install the `chrome-remote-desktop` host, pair at `remotedesktop.google.com`, set a PIN. Don't run the install — just tell me the URL and why.
 
-c) MCP-disconnect recovery ritual. If the Telegram tools silently stop working:
+c) MCP-disconnect recovery ritual. If you launched via the `ct` alias (tmux + watchdog), the health-check script auto-issues `/mcp reconnect plugin:telegram:telegram` into your session within ~90s of any disconnect — you should rarely see the issue. If it still happens:
 - First: `tail -20 ~/.claude/channels/telegram/server.log` for the last boot line and any errors.
+- Manual: type `/mcp reconnect plugin:telegram:telegram` in your prompt (works inline, no menu navigation).
 - `/reload-plugins` does NOT reliably fix channel plugins (bun server can end up orphaned, still polling Telegram but writing notifications into a dead MCP stdio pipe).
-- Reliable fix: `/exit` then `ct` (full process replacement).
+- Last resort: `/exit` then `ct` (full process replacement).
 
 **Verify Part 6:** `alias cc ct` in the shell lists both aliases.
 
