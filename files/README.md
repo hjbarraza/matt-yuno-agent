@@ -27,6 +27,7 @@ files/
 ├── scripts/                           ← drop each file into ~/.claude/scripts/
 │   ├── kokoro-tts.py                  text→speech helper (Kokoro 82M, fast default, ~3s wall time)
 │   ├── voxtral-tts.py                 text→speech helper (Voxtral 4B, slower ~30s wall time but more personality)
+│   ├── TTS-TUNING.md                  ← READ FIRST — chunking strategy + Voxtral params + writing style (saves a debugging evening)
 │   └── mcp-health-check.py            detects MCP disconnect (patched-server-aware)
 ├── launchagents/
 │   └── mcp-health.plist               runs the health check every 300s
